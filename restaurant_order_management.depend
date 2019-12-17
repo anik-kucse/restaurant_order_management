@@ -1,6 +1,8 @@
 # depslib dependency file v1.0
-1514140574 source:c:\users\anik\documents\cpp\restaurant_order_management\restaurant_order_management\main.cpp
+1576609512 source:c:\users\anik\documents\cpp\restaurant_order_management\restaurant_order_management\main.cpp
 	<iostream>
+	<Food.h>
+	<string>
 
 1576606356 source:c:\users\anik\documents\cpp\restaurant_order_management\restaurant_order_management\src\food.cpp
 	"Food.h"
@@ -27,4 +29,11 @@
 1576605750 c:\users\anik\documents\cpp\restaurant_order_management\restaurant_order_management\include\submenu.h
 	<Menu.h>
 	<string>
+
+1576610325 source:c:\users\anik\documents\cpp\restaurant_order_management\restaurant_order_management\src\singleorder.cpp
+	"SingleOrder.h"
+	<iostream>
+
+1576610179 c:\users\anik\documents\cpp\restaurant_order_management\restaurant_order_management\include\singleorder.h
+	<Food.h>
 
