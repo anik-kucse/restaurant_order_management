@@ -3,27 +3,17 @@
 
 SingleOrder::SingleOrder(){}
 
-SingleOrder::SingleOrder(int id, Food food, int quantity)
+SingleOrder::SingleOrder( Food & food, int quantity)
 {
-    this->singleOrderId = id;
     this->food = food;
     this->quantity = quantity;
-}
-
-int SingleOrder::getId()
-{
-    return singleOrderId;
-}
-void SingleOrder::setId(int id)
-{
-    singleOrderId = id;
 }
 
 Food SingleOrder::getFood()
 {
     return food;
 }
-void SingleOrder::setFood()
+void SingleOrder::setFood(Food & food)
 {
     this->food = food;
 }
@@ -49,5 +39,5 @@ void SingleOrder::decreaseItem(int i)
 
 SingleOrder::~SingleOrder()
 {
-    std::cout << getId() << " Destroyed\n";
+    std::cout  << "Single order Destroyed\n";
 }

@@ -6,16 +6,32 @@
 class Order
 {
     public:
-        static int orderNumber;
+        SingleOrder orderList[1000];
+
         Order();
+
+        Order(int orderNumber, std::string name);
+
+        void setOrderNumber(int orderNumber);
+        int getOrderNumber();
+
+        void setName(std::string name);
+        std::string getName();
+
+        void addOrder(SingleOrder order);
+        void removeOrder(int position);
+
+        int getSize();
+
         ~Order();
 
     protected:
 
     private:
-        int id;
+        int orderNumber;
+        int size;
         std::string customerName;
-        SingleOrder orderList[1000];
+
 };
 
 #endif // ORDER_H

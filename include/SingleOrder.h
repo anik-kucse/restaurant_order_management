@@ -6,13 +6,10 @@ class SingleOrder
 {
     public:
         SingleOrder();
-        SingleOrder(int id, Food food, int quantity);
-
-        int getId();
-        void setId(int id);
+        SingleOrder(Food & food, int quantity);
 
         Food getFood();
-        void setFood();
+        void setFood(Food & food);
 
         int getQuantity();
         void setQuantity(int i);
@@ -26,7 +23,6 @@ class SingleOrder
     protected:
 
     private:
-        int singleOrderId;
         Food food;
         int quantity;
 };
