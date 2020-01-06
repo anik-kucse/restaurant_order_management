@@ -39,5 +39,5 @@ void SingleOrder::decreaseItem(int i)
 
 SingleOrder::~SingleOrder()
 {
-    std::cout  << "Single order Destroyed\n";
+//    std::cout  << "Single order Destroyed\n";
 }

@@ -45,5 +45,5 @@ void Food::setQunatity(int foodQuantity)
 
 Food::~Food()
 {
-    std::cout << getName() << " destroyed\n";
+//    std::cout << getName() << " destroyed\n";
 }

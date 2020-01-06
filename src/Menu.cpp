@@ -20,5 +20,5 @@ void Menu::setMenuTyoe(std::string type)
 
 Menu::~Menu()
 {
-    std::cout << getMenuType() << " destroyed\n";
+//    std::cout << getMenuType() << " destroyed\n";
 }

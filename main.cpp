@@ -5,6 +5,10 @@
 #include <memory>
 #include <SingleOrder.h>
 #include <Order.h>
+#include <vector>
+#include<ios>
+#include<limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -12,9 +16,14 @@ void clearView();
 string showGreatings();
 int showMainMenu();
 int getSubMenuSize(int menu);
-unique_ptr<SingleOrder> showSubMenu(int menu);
+bool showSubMenu(int menu, vector <unique_ptr<SingleOrder>> *cart);
 int showSubMenuItem(Food subMenu[], int len);
-unique_ptr<SingleOrder> createSingleOrder(Food food, int quantity);
+void addOrUpdateCart(Food food, int quantity, vector<unique_ptr<SingleOrder>> *cart);
+void allCartItem(vector<unique_ptr<SingleOrder>> *cart);
+int viewCart(vector<unique_ptr<SingleOrder>> *cart);
+void checkOut(vector<unique_ptr<SingleOrder>> *cart);
+int orderDetail(string name, vector<unique_ptr<SingleOrder>> *cart);
+void modifyCart(vector<unique_ptr<SingleOrder>> *cart);
 
 int orderNumber = 1100;
 int curentStage;
@@ -57,21 +66,30 @@ Food drinksList [] = {
 
 string menuList[] = {"Starter", "Appetizer", "Chicken", "Beef", "Seafood", "Combo", "Drinks"};
 
+string paymentOption[] = {"Cash", "Card", "E Wallet", "Online transfer"};
+
+struct Payment{
+    int option;
+    long int cash, cardNumber;
+};
+
+struct Payment payment;
+
+long int total;
+
 int main()
 {
-
-    curentStage = 0; // 0 =? initialize;
+    curentStage = 0; // 0 => initialize;
                      // 1 => showMainMenu;
                      // 2 => showSubMenu;
-                     // 3 => Drinks & Beverage
-                     // 4 => viewCart;
-                     // 5 => checkOut;singleOrder
-                     // 6 => thanksScreen;
+                     // 3 => viewCart;
+                     // 4 => modifyCurrent order;
+                     // 5 => checkOut;
+                     // 6 => orderDetail;
     bool isContinue = true;
     string name;
     int currentMenu;
-    unique_ptr<SingleOrder> orderList[1000];
-    int orderSize = 0;
+    vector <unique_ptr<SingleOrder>> cart;
 
     while (isContinue){
         switch (curentStage){
@@ -82,19 +100,34 @@ int main()
             case 1:
                 currentMenu = showMainMenu();
                 curentStage++;
-                cout << currentMenu << endl;
                 break;
             case 2:
-                orderList[orderSize] = move(showSubMenu(currentMenu));
-                curentStage--;
-                cout << "*************************************************************************" << endl;
+                bool wantToOderMore;
 
-                for(int i = 0; i<= orderSize; i++) {
-                    cout << "Qnt: "<<orderList[i]->getQuantity() << endl;
-                    cout << "Food Name: "<<orderList[i]->getFood().getName() << endl;
+                wantToOderMore = showSubMenu(currentMenu, &cart);
+                if(wantToOderMore) {
+                    curentStage--;
+                } else {
+                    curentStage++;
                 }
-                orderSize++;
-
+                break;
+            case 3:
+                curentStage = viewCart(&cart);
+                break;
+            case 4:
+                modifyCart(&cart);
+                curentStage++;
+                break;
+            case 5:
+                checkOut(&cart);
+                curentStage++;
+                break;
+            case 6:
+                curentStage = orderDetail(name, &cart);
+                for (size_t i = 0; i < cart.size(); i++) {
+                    cart[i]->~SingleOrder();
+                }
+                cart.clear();
                 break;
             default:
                 isContinue = false;
@@ -120,10 +153,14 @@ string showGreatings(){
 int showMainMenu(){
     int selection;
     int menuSize = *(&menuList +  1) - menuList;
+    cout << "Main menu list" << endl;
+    cout << "----------------------" << endl;
     cout << "No \tMenu Name" << endl;
-    for (int i = 0; i < menuSize - 1; i++) {
+    cout << "----------------------" << endl;
+    for (int i = 0; i < menuSize; i++) {
         cout << i + 1 << "\t" << menuList[i] << endl;
     }
+    cout << "----------------------" << endl;
     cout << "Pick a menu to continue: ";
     cin >> selection;
     clearView();
@@ -158,61 +195,191 @@ int getSubMenuSize(int menu) {
     }
 }
 
-unique_ptr<SingleOrder> showSubMenu(int menu){
-    int selection;
+bool showSubMenu(int menu, vector <unique_ptr<SingleOrder>> *cart){
     Food currentSelectedFood;
     int subMenuSize = getSubMenuSize(menu);
     switch (menu) {
         case 1:
-            selection = showSubMenuItem(starterList, subMenuSize);
-            currentSelectedFood = starterList[selection - 1];
+            currentSelectedFood = starterList[showSubMenuItem(starterList, subMenuSize) - 1];
             break;
         case 2:
-            selection = showSubMenuItem(appetizerList, subMenuSize);
-            currentSelectedFood = appetizerList[selection - 1];
+            currentSelectedFood = appetizerList[showSubMenuItem(appetizerList, subMenuSize) - 1];
             break;
         case 3:
-            selection = showSubMenuItem(chickenList, subMenuSize);
-            currentSelectedFood = chickenList[selection - 1];
+            currentSelectedFood = chickenList[showSubMenuItem(chickenList, subMenuSize) - 1];
             break;
         case 4:
-            selection = showSubMenuItem(beefList, subMenuSize);
-            currentSelectedFood = beefList[selection - 1];
+            currentSelectedFood = beefList[showSubMenuItem(beefList, subMenuSize) - 1];
             break;
         case 5:
-            selection = showSubMenuItem(seeFoodList, subMenuSize);
-            currentSelectedFood = seeFoodList[selection - 1];
+            currentSelectedFood = seeFoodList[showSubMenuItem(seeFoodList, subMenuSize) - 1];
             break;
         case 6:
-            selection = showSubMenuItem(comboList, subMenuSize);
-            currentSelectedFood = comboList[selection - 1];
+            currentSelectedFood = comboList[showSubMenuItem(comboList, subMenuSize) - 1];
+            break;
+        case 7:
+            currentSelectedFood = drinksList[showSubMenuItem(drinksList, subMenuSize) - 1];
             break;
     }
     int quantity;
     cout << "Please enter quantity of this item: ";
     cin >> quantity;
-
-    auto singleOrder = createSingleOrder(currentSelectedFood, quantity);
-    return singleOrder;
+    addOrUpdateCart(currentSelectedFood, quantity, cart);
+    char selection;
+    cout << "Item saved :D.\nDo you want to order more? (Y/n): " << endl;
+    cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+    clearView();
+    if (selection == 'Y' || selection == 'y')
+        return true;
+    else
+        return false;
 }
 
 int showSubMenuItem(Food subMenu[], int len) {
     cout << "Current Sub menu: " << subMenu[0].getSubMenutype() << endl;
+    cout << "--------------------------------------------------------" << endl;
     cout << "No \tFood Name \tQuantity \tPrice" << endl;
+    cout << "--------------------------------------------------------" << endl;
     for (int i = 0; i < len; i++) {
         cout << i + 1 << "\t" << subMenu[i].getName() << "\t" << subMenu[i].getQuantity() << "\t\t" << subMenu[i].getPrice() << " rm" << endl;
     }
-
+    cout << "--------------------------------------------------------" << endl;
     int selection;
     cout << "Pick an item to continue: ";
     cin >> selection;
     return selection;
 }
 
-unique_ptr<SingleOrder> createSingleOrder(Food food, int quantity) {
-    cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+void addOrUpdateCart(Food food, int quantity, vector<unique_ptr<SingleOrder>> *cart) {
+
+    for (size_t i = 0; i < cart->size(); i++) {
+        if (cart->at(i)->getFood().getName() == food.getName()) {
+            cart->at(i)->increaseItem(quantity);
+            return;
+        }
+    }
+
     unique_ptr<SingleOrder> singleOrder = make_unique<SingleOrder>();
     singleOrder->setFood(food);
     singleOrder->setQuantity(quantity);
-    return singleOrder;
+    cart->push_back(move(singleOrder));
 }
+
+void allCartItem(vector<unique_ptr<SingleOrder>> *cart) {
+    total = 0;
+    cout << "No.\tName\t\tQuantity\tUnit Price \tTotal Price" << endl;
+    cout << "-----------------------------------------------------------------------" << endl;
+    for(size_t i = 0; i < cart->size(); i++) {
+        total += cart->at(i)->getQuantity() * cart->at(i)->getFood().getPrice() ;
+        cout << i + 1 << "\t";
+        cout << cart->at(i)->getFood().getName() << "\t";
+        cout << cart->at(i)->getQuantity() << "\t\t";
+        cout << cart->at(i)->getFood().getPrice() << "\t\t" ;
+        cout << cart->at(i)->getQuantity() * cart->at(i)->getFood().getPrice() << endl;
+    }
+    cout << "-----------------------------------------------------------------------" << endl;
+    cout << "\t\t\t\t\t\t\tTotal: " << total << endl;
+}
+
+int viewCart(vector<unique_ptr<SingleOrder>> *cart) {
+    cout << "\t\t\t\t Cart Detail" << endl;
+    cout << "-----------------------------------------------------------------------" << endl;
+    allCartItem(cart);
+    char selection;
+
+    cout << "Do you want to add more Item? (Y/n): ";
+    cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+
+    if(selection == 'Y' || selection == 'y') {
+        clearView();
+        return 1;
+    } else {
+        cout << "Do you want to modify cart? (Y/n): ";
+        cin >> selection;
+        cin.ignore(numeric_limits<streamsize>::max(),'\n');
+        clearView();
+        if(selection == 'Y' || selection == 'y') {
+            return 4;
+        } else {
+            return 5;
+        }
+    }
+
+
+
+}
+
+void checkOut(vector<unique_ptr<SingleOrder>> *cart) {
+    cout << "Payment options" << endl;
+    cout << "-------------------------------" << endl;
+    int len = *(&paymentOption +  1) - paymentOption;
+    for (int i = 0; i < len; i++) {
+        cout << i + 1 << " " + paymentOption[i] << endl;
+    }
+    cout << "-------------------------------" << endl;
+    cout << "Select Payment Option: ";
+    int selection;
+    cin >> selection;
+    switch(selection) {
+        case 1:
+            payment.option = 1;
+            payment.cardNumber = 0;
+            cout << "Have to pay: " << total << endl;
+            cout << "You wants to pay: " ;
+            cin >> payment.cash;
+            break;
+        case 2:
+        case 3:
+        case 4:
+            payment.option = 2;
+            payment.cash = total;
+            cout << "Your Card/Account number: " ;
+            cin >> payment.cardNumber;
+            break;
+    }
+    clearView();
+}
+
+int orderDetail(string name, vector<unique_ptr<SingleOrder>> *cart) {
+    cout << "This invoice is generated for " << name << " for following items" << endl;
+    cout << "-----------------------------------------------------------------------" << endl;
+    allCartItem(cart);
+    cout << "-----------------------------------------------------------------------" << endl;
+    cout << "Payment option: " << paymentOption[payment.option - 1] << endl;
+    if(payment.option != 1) {
+       cout << "Card/Account number: " << payment.cardNumber<< endl;
+    }
+    cout << "Paid: " << payment.cash << endl;
+    cout << "Return: " << payment.cash - total << endl;
+
+    char selection;
+    cout << "Do you want to order again? (Y/n): ";
+    cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+    clearView();
+    if(selection == 'Y' || selection == 'y'){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void modifyCart(vector<unique_ptr<SingleOrder>> *cart){
+    cout << "\t\t\t\t Cart Detail" << endl;
+    cout << "-----------------------------------------------------------------------" << endl;
+    allCartItem(cart);
+    int selection;
+    cout << "Select an item to modify: ";
+    cin >> selection;
+    int itemCount;
+    cout << "Enter the new item count of " << cart->at(selection - 1)->getFood().getName() << ": ";
+    cin >> itemCount;
+    cart->at(selection - 1)->setQuantity(itemCount);
+    clearView();
+    viewCart(cart);
+}
+
+
+

@@ -21,5 +21,5 @@ void SubMenu::setSubMenuType(std::string type)
 
 SubMenu::~SubMenu()
 {
-    std::cout << getSubMenutype() << " destroyed\n";
+//    std::cout << getSubMenutype() << " destroyed\n";
 }
