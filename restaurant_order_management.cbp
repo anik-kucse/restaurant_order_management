@@ -36,13 +36,11 @@
 		</Compiler>
 		<Unit filename="include/Food.h" />
 		<Unit filename="include/Menu.h" />
-		<Unit filename="include/Order.h" />
 		<Unit filename="include/SingleOrder.h" />
 		<Unit filename="include/SubMenu.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/Food.cpp" />
 		<Unit filename="src/Menu.cpp" />
-		<Unit filename="src/Order.cpp" />
 		<Unit filename="src/SingleOrder.cpp" />
 		<Unit filename="src/SubMenu.cpp" />
 		<Extensions>
